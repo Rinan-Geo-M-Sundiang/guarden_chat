@@ -1,0 +1,40 @@
+{
+  "averages": {
+    "humidity": 0,
+    "moisture": 0,
+    "temperature": 0
+  },
+  "config": {
+    "thresholds": {
+      "humidityWarn": 50,
+      "moistureWarn": 40,
+      "tempOff": 0,
+      "tempOn": 40,
+      "temperatureWarn": 25
+    },
+    "thresholds_updated": 1
+  },
+  "control": {
+    "relay": false
+  },
+  "sensors": {
+    "zone-1": {
+      "humidity": 60.5,
+      "moisture": 0,
+      "temperature": 8.5,
+      "updatedAt": 1777779353
+    },
+    "zone-2": {
+      "humidity": 40,
+      "moisture": 0,
+      "temperature": 13.4,
+      "updatedAt": 1777779327
+    },
+    "zone-3": {
+      "humidity": 40,
+      "moisture": 0,
+      "temperature": 41.5,
+      "updatedAt": 1777779327
+    }
+  }
+}
