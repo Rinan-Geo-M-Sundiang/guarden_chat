@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // firebase_uploader.h — WiFi + NTP + Firebase RTDB via direct REST (no SDK)
 //
 // REST endpoints:
@@ -24,8 +24,8 @@
 #define WIFI_CHANNEL 6
 
 // ─── Firebase RTDB ────────────────────────────────────────────────────────────
-#define FIREBASE_DB_URL ""
-#define FIREBASE_SECRET ""
+#define FIREBASE_DB_URL "https://esp32testing-477e7-default-rtdb.asia-southeast1.firebasedatabase.app"
+#define FIREBASE_SECRET "43yYixk5sz0ssIFjCFzVsvHaMdaKPyBX6UIko1ye"
 
 // ─── NTP ──────────────────────────────────────────────────────────────────────
 #define NTP_SERVER     "pool.ntp.org"
@@ -104,7 +104,7 @@ static bool _pushZoneSensor(WiFiClientSecure& client,
     char body[128];
     snprintf(body, sizeof(body),
              "{\"temperature\":%.2f,\"humidity\":%.2f,\"moisture\":%.2f,\"updatedAt\":%lu}",
-             temp, hum, moisture, ts);
+             temp, hum, moisture, (unsigned long long)ts * 1000ULL);
 
     // Targets:
     //   zone=1 → /sensors/zone-1.json
