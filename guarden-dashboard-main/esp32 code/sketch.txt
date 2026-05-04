@@ -184,16 +184,10 @@ void setup() {
     dht1.begin(); dht2.begin(); dht3.begin();
 
     // ── DHT22 requires at least 2 s after power-on before first read ──────────
-    // An additional settle delay avoids the first-read NaN that DHT22 commonly
-    // produces when queried too soon after begin().
     Serial.println("Waiting for DHT22 sensors to settle...");
     delay(2500);
 
-    // ── Initial sensor read in setup() — this is the fix for ZONE_SKIP ────────
-    // Without this, validZones[] stays all-false until the first SENSOR_INTERVAL
-    // fires in loop(). Since lastUpload is pre-wound by 8 s, the first upload
-    // fires before the first sensor read, sending all zones as skipped.
-    // Reading here ensures valid data exists before loop() starts.
+    // ── Initial sensor read in setup() ────────────────────────────────────────
     Serial.println("Initial sensor read...");
     readSensors();
 
@@ -210,11 +204,9 @@ void setup() {
     if (WiFi.status() == WL_CONNECTED) {
         Serial.println("WiFi connected");
 
-        // Init NTP here so _epoch() is valid before loop() runs
         configTime(NTP_GMT_OFFSET, NTP_DST_OFFSET, NTP_SERVER);
         waitForNTP(10000UL);
 
-        // Pull thresholds before the first relay decision
         updateRemoteThresholds();
         lastKnownThresholdTs = fetchThresholdUpdateTime();
 
@@ -227,12 +219,7 @@ void setup() {
         Serial.println("WiFi timeout — using default thresholds, NTP unavailable");
     }
 
-    // ── Pre-wind lastSensorRead so the next read fires after SENSOR_INTERVAL ──
-    // (not immediately on the first loop tick, since we already read above)
     lastSensorRead     = millis();
-    // ── Pre-wind lastUpload so first upload fires ~10 s into loop() ───────────
-    // Previously this was millis() - 8000UL which caused upload before any
-    // sensor data existed. Now it fires naturally after UPLOAD_INTERVAL.
     lastUpload         = millis();
     lastThresholdCheck = millis();
     lastRelayCheck     = millis();
@@ -260,18 +247,19 @@ void loop() {
     if (millis() - lastUpload >= UPLOAD_INTERVAL) {
         lastUpload = millis();
 
-        // Guard: skip upload entirely if every zone failed this cycle.
-        // This replaces the old _epoch() guard which caused the NTP deadlock.
-        // A partial upload (some zones valid, some not) is handled inside
-        // _pushAll() which already skips invalid zones individually.
         if (!anyZoneValid()) {
             Serial.println("UPLOAD_SKIP: no valid sensor readings this cycle");
             return;
         }
 
-        float avgTemp = avgOf(temps, validZones);
-        float avgHum  = avgOf(hums,  validZones);
-        uploadOrBuffer(avgTemp, avgHum, temps, hums, moistures, validZones);
+        float avgTemp     = avgOf(temps,     validZones);
+        float avgHum      = avgOf(hums,      validZones);
+        float avgMoisture = avgOf(moistures, validZones);  // FIX: was missing
+
+        Serial.printf("AVG  temp=%.1f  hum=%.1f  moisture=%.1f\n",
+                      avgTemp, avgHum, avgMoisture);
+
+        uploadOrBuffer(avgTemp, avgHum, avgMoisture, temps, hums, moistures, validZones);
     }
 
     delay(100);
