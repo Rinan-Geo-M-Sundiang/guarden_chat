@@ -1,37 +1,50 @@
 {
   "rules": {
-    ".read":  false,
-    ".write": false,
-
+    ".read": true,
+    ".write": "auth != null",
     "sensors": {
       ".read": true,
-      ".write": false,
-
+      ".write": "auth != null",
       "$zone": {
         ".read": true,
-        ".write": false,
-
+        ".write": "auth != null",
         ".validate": "newData.hasChildren(['moisture', 'temperature', 'humidity', 'updatedAt'])",
-
-        "moisture": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
-        },
-        "temperature": {
-          ".validate": "newData.isNumber() && newData.val() >= -40 && newData.val() <= 85"
-        },
-        "humidity": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
-        },
-        "updatedAt": {
-          ".validate": "newData.isNumber() && newData.val() > 0"
-        },
-        "plant": {
-          ".validate": "newData.isString() && newData.val().length <= 32"
-        },
-        "$other": {
-          ".validate": false
-        }
+        "moisture":    { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+        "temperature": { ".validate": "newData.isNumber() && newData.val() >= -40 && newData.val() <= 85" },
+        "humidity":    { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+        "updatedAt":   { ".validate": "newData.isNumber() && newData.val() > 0" },
+        "plant":       { ".validate": "newData.isString() && newData.val().length <= 32" },
+        "$other":      { ".validate": false }
       }
+    },
+    "control": {
+      ".read": true,
+      ".write": true,
+      "relay": {
+        ".validate": "newData.isBoolean()"
+      },
+      "$other": { ".validate": false }
+    },
+    "config": {
+      ".read": true,
+      ".write": true,
+      "thresholds": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['tempOn', 'tempOff', 'moistureOn', 'moistureOff', 'moistureWarn', 'temperatureWarn', 'humidityWarn'])",
+        "tempOn":          { ".validate": "newData.isNumber() && newData.val() > -50 && newData.val() < 100" },
+        "tempOff":         { ".validate": "newData.isNumber() && newData.val() > -50 && newData.val() < 100" },
+        "moistureOn":      { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+        "moistureOff":     { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+        "moistureWarn":    { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+        "temperatureWarn": { ".validate": "newData.isNumber() && newData.val() > -50 && newData.val() < 100" },
+        "humidityWarn":    { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+        "$other":          { ".validate": false }
+      },
+      "thresholds_updated": {
+        ".validate": "newData.isNumber() && newData.val() > 0"
+      },
+      "$other": { ".validate": false }
     }
   }
 }
